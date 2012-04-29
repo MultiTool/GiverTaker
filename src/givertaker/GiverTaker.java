@@ -6,7 +6,7 @@ package givertaker;
 
 /**
  *
- * @author john
+ * @author MultiTool
  */
 public class GiverTaker {
 
