@@ -19,6 +19,7 @@ public class Things {
   {
   }
   //#region GT
+  public enum OrgType{  Giver,Taker  };
   public Random rand = new Random();//static 
   public class Org
   {
@@ -142,7 +143,7 @@ public class Things {
           DeathList.add(ph0);
         }
       }
-      else //if my grid empty: 
+      else //if this grid cell empty
       {
         double sum = ph0.GetRegionE();//take E of region in grid
         if (sum >= BThresh)
@@ -151,7 +152,7 @@ public class Things {
         }
       }
     }
-
+    // Shuffle(SpawnList); // randomize to prevent spatial bias in birth order
     // SpawnList.Sort(IComparer ) // sort by sum E here.
 
     for  (PlaceHolder ph : SpawnList)
@@ -164,9 +165,7 @@ public class Things {
 /*
         bill nbrs;
         all nbrs or did we just get and charge the best?
-        * 
-        */
-        /*
+        
         we have to decide, do we scan and bill all of the parents or just the richest?
 
         richest is easier. if we bill all, we could bill some to death. 
