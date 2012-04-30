@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.awt.*;
 
 import java.util.Random;
+import java.util.HashMap;
   
 
 /**
@@ -19,13 +20,56 @@ public class Things {
   {
   }
   //#region GT
-  public enum OrgType{  Giver,Taker  };
+  public enum OrgType{  Giver,Taker };
+  public static final int GiverType=0,TakerType=1,NumTypes=2;
+  
   public Random rand = new Random();//static 
-  public class Org
+  
+  public static final Double LThresh = 0.5;
+  public static final Double BThresh = LThresh + 0.5;
+  public static class Org
   {
+    public int MyType; // OrgType MyType;
     public double E;
-    //public Org CopyMe() { return (Org)this.MemberwiseClone(); }
+    public double GetSpareE(){// food above survival level
+      return this.E;
+    }
+    public Org CopyMe() {
+      try{
+       return (Org)this.clone(); 
+      }catch(Exception ex){
+       return null;
+      }
+    }
   }
+  
+  public static class Giver extends Org{
+    @Override
+    public Org CopyMe() {
+      try{
+        return (Giver)this.clone(); 
+      }catch(Exception ex){
+        return null;
+      }
+    }
+  };
+  public static class Taker extends Org{
+  @Override
+    public Org CopyMe() {
+      try{
+        return (Taker)this.clone(); 
+      }catch(Exception ex){
+        return null;
+      }
+    }
+  };
+  public static final Org[] OrgMaker = new Org[]{
+    new Giver(),new Taker()
+  };
+  // private static final HashMap<Integer, OrgType> Num2Type = new HashMap<Integer, OrgType>();
+  //private static final OrgType[] Num2Type = new OrgType[]{OrgType.Giver,OrgType.Taker};
+  //private static final HashMap<OrgType,Integer > Type2Num = new HashMap<OrgType,Integer >();
+  
   public class PlaceHolder
   {
     public Org Ctr;
@@ -69,8 +113,34 @@ public class Things {
       }
       return NbrE;
     }
+    public double Spawn()
+    {
+      double[] NbrEList = new double[NumTypes];
+      for (int nbrcnt = 0; nbrcnt < 8; nbrcnt++)
+      {
+        PlaceHolder PhNbr = Nbrs[nbrcnt];
+        if (PhNbr.Ctr != null) { 
+          NbrEList[PhNbr.Ctr.MyType] += PhNbr.Ctr.E;
+        }
+      }
+      
+      int FattestType=0;
+      double MaxFat=-1.0;
+      for (int tcnt=0;tcnt<NumTypes;tcnt++){
+        if (MaxFat< NbrEList[tcnt]){
+          MaxFat= NbrEList[tcnt];
+          FattestType=tcnt;
+        }
+      }
+      
+      if ((MaxFat - LThresh)>=BThresh){
+        // 
+      }
+      
+      return MaxFat;
+    }
   }
-  public class Grid2 extends ArrayList<PlaceHolder>
+  public class GridWorld extends ArrayList<PlaceHolder>
   {
     public int Sz;
     public int Wdt, Hgt;
@@ -126,10 +196,8 @@ public class Things {
     }
     public int GetSz() { return Sz; }
   }
-  public void SingleGrid(Grid2 MyGrid)
+  public void SingleGrid(GridWorld MyGrid)
   {// this is the copy part
-    Double LThresh = 0.5;
-    Double BThresh = LThresh + 0.5;
     ArrayList<PlaceHolder> SpawnList = new ArrayList<PlaceHolder>();
     ArrayList<PlaceHolder> DeathList = new ArrayList<PlaceHolder>();
     int Sz = MyGrid.GetSz();
