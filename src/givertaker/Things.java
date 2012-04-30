@@ -5,10 +5,12 @@
 package givertaker;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
 import java.awt.*;
 
-import java.util.Random;
-import java.util.HashMap;
+import java.util.*;
   
 
 /**
@@ -222,7 +224,26 @@ public class Things {
     }
     // Shuffle(SpawnList); // randomize to prevent spatial bias in birth order
     // SpawnList.Sort(IComparer ) // sort by sum E here.
+    Collections.shuffle(SpawnList);
+    Collections.sort(SpawnList, new Comparator() {
+      @Override
+    public int compare(Object o1, Object o2) {
+      String s1 = o1.toString().toLowerCase();
+      String s2 = o2.toString().toLowerCase();
+      return s2.compareTo(s1);
+    }
+  });
 
+    /*
+Arrays.sort(contributors, new Comparator() {
+    public int compare(Object o1, Object o2) {
+      String s1 = o1.toString().toLowerCase();
+      String s2 = o2.toString().toLowerCase();
+      return s2.compareTo(s1);
+    }
+  });
+
+     */
     for  (PlaceHolder ph : SpawnList)
     {//now go down list, for each
       double sum = ph.GetRegionE();//check all nbr E in grid0
