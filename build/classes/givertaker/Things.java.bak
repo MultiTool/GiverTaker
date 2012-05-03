@@ -146,6 +146,7 @@ public class Things {
   }
   /* *************************************************************************************************** */
   public class GridWorld extends ArrayList<PlaceHolder> {
+
     public int Sz;
     public int Wdt, Hgt;
     /* *************************************************************************************************** */
@@ -192,13 +193,16 @@ public class Things {
         }
       }
     }
+
     public PlaceHolder Get(int Col, int Row) {
       int Dex = Row * Wdt + Col;
       return this.get(Dex);
     }
+
     public PlaceHolder Get(int Dex) {
       return this.get(Dex);
     }
+
     public int GetSz() {
       return Sz;
     }
