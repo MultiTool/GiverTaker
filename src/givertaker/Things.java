@@ -120,6 +120,21 @@ public class Things {
       return false;
     }
     /* *************************************************************************************************** */
+    public void AcceptChild() {
+      Org child = this.FattestNbr.Ctr.CopyMe();// Birth
+      /*
+       * now give the child LThresh, and bill the parent.
+       * 
+       */
+      this.Ctr = child;
+    }
+    /* *************************************************************************************************** */
+    public void Vacate() {
+      // delete ph.Ctr
+      this.Ctr = null;
+      this.Fertility = 0;
+    }
+    /* *************************************************************************************************** */
     public double GetRegionE() {
       double NbrE = 0;
       for (int nbrcnt = 0; nbrcnt < 8; nbrcnt++) {
@@ -222,17 +237,17 @@ public class Things {
     ArrayList<PlaceHolder> DeathList = new ArrayList<PlaceHolder>();
     int Sz = MyGrid.GetSz();
     for (int cnt = 0; cnt < Sz; cnt++) {
-      PlaceHolder ph0 = MyGrid.Get(cnt);
-      if (ph0.Ctr != null)// if my grid cell full:
+      PlaceHolder ph = MyGrid.Get(cnt);
+      if (ph.Ctr != null)// if my grid cell full:
       {
-        if (ph0.Ctr.IsMoribund()) {//if E not enough to live
-          DeathList.add(ph0);// mark for death
+        if (ph.Ctr.IsMoribund()) {//if E not enough to live
+          DeathList.add(ph);// mark for death
         }
       } else {//if this grid cell empty
         // double sum = ph0.GetRegionE();//take E of region in grid
-        ph0.UpdateFertility();//take E of region in grid
-        if (ph0.IsFertile()) {// mark cell for possible birth
-          BirthList.add(ph0);
+        ph.UpdateFertility();//take E of region in grid
+        if (ph.IsFertile()) {// mark cell for possible birth
+          BirthList.add(ph);
         }
       }
     }
@@ -251,8 +266,7 @@ public class Things {
       ph.UpdateFertility();//take E of region in grid
       if (ph.IsFertile())// if neighborhood still has resources to create child 
       {
-        Org Ctr = new Org(); // Birth
-        MyGrid.Get(ph.MyDex).Ctr = Ctr;
+        ph.AcceptChild();
         /*
          bill nbrs;
          all nbrs or did we just get and charge the best?
@@ -269,8 +283,7 @@ public class Things {
     }
 
     for (PlaceHolder ph : DeathList) {//now go down list, for each
-      // delete ph.Ctr
-      ph.Ctr = null;
+      ph.Vacate();
     }
   }
   //#endregion GT 
