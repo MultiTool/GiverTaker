@@ -104,6 +104,7 @@ public class Things {
           }
         }
       }
+      this.NbrHoodE = BestNbrE;// side effect! inelegant.
       return BestNbr;
     }
     /* *************************************************************************************************** */
