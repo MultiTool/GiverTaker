@@ -33,6 +33,9 @@ public class Things {
     public double GetSpareE() {// food above survival level
       return this.E - LThresh;
     }
+    public boolean IsMoribund() {
+      return this.E < LThresh;//if E not enough to live
+    }
     public Org CopyMe() {
       try {
         return (Org) this.clone();
@@ -79,6 +82,7 @@ public class Things {
   public class PlaceHolder {
     public Org Ctr;
     public int MyDex;
+    public PlaceHolder FattestNbr;
     public double NbrHoodE = 0.0;
     public PlaceHolder[] Nbrs = new PlaceHolder[8];
     /* *************************************************************************************************** */
@@ -105,7 +109,15 @@ public class Things {
         }
       }
       this.NbrHoodE = BestNbrE;// side effect! inelegant.
+      this.FattestNbr = BestNbr;
       return BestNbr;
+    }
+    /* *************************************************************************************************** */
+    public boolean IsFertile() {
+      if (NbrHoodE >= BThresh) {// wrong!! work this out right.
+        return true;
+      }
+      return false;
     }
     /* *************************************************************************************************** */
     public double GetRegionE() {
@@ -213,14 +225,13 @@ public class Things {
       PlaceHolder ph0 = MyGrid.Get(cnt);
       if (ph0.Ctr != null)// if my grid cell full:
       {
-        if (ph0.Ctr.E < LThresh)//if E not enough to live:
-        {// mark for death
-          DeathList.add(ph0);
+        if (ph0.Ctr.IsMoribund()) {//if E not enough to live
+          DeathList.add(ph0);// mark for death
         }
-      } else //if this grid cell empty
-      {
-        double sum = ph0.GetRegionE();//take E of region in grid
-        if (sum >= BThresh) {// mark cell for possible birth
+      } else {//if this grid cell empty
+        // double sum = ph0.GetRegionE();//take E of region in grid
+        ph0.GetFattestNbr();//take E of region in grid
+        if (ph0.IsFertile()) {// mark cell for possible birth
           BirthList.add(ph0);
         }
       }
@@ -228,7 +239,6 @@ public class Things {
 
     Collections.shuffle(BirthList);// randomize to prevent spatial bias in birth order
     Collections.sort(BirthList, new Comparator() {// sort by sum E here.
-
       @Override
       public int compare(Object o1, Object o2) {
         PlaceHolder s1 = (PlaceHolder) o1;
