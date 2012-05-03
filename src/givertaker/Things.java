@@ -83,10 +83,10 @@ public class Things {
     public Org Ctr;
     public int MyDex;
     public PlaceHolder FattestNbr;
-    public double NbrHoodE = 0.0;
+    public double Fertility = 0.0;
     public PlaceHolder[] Nbrs = new PlaceHolder[8];
     /* *************************************************************************************************** */
-    public PlaceHolder GetFattestNbr() {
+    public PlaceHolder UpdateFertility() {
       PlaceHolder BestNbr = null;
       double BestNbrE = -1.0;
       int BestCnt = 0;
@@ -108,13 +108,13 @@ public class Things {
           }
         }
       }
-      this.NbrHoodE = BestNbrE;// side effect! inelegant.
+      this.Fertility = BestNbrE;// side effect! inelegant.
       this.FattestNbr = BestNbr;
       return BestNbr;
     }
     /* *************************************************************************************************** */
     public boolean IsFertile() {
-      if (NbrHoodE >= BThresh) {// wrong!! work this out right.
+      if (Fertility >= BThresh) {// wrong!! work this out right.
         return true;
       }
       return false;
@@ -128,7 +128,7 @@ public class Things {
           NbrE += ph.Ctr.E;
         }
       }
-      this.NbrHoodE = NbrE;
+      this.Fertility = NbrE;
       return NbrE;
     }
     /* *************************************************************************************************** */
@@ -230,7 +230,7 @@ public class Things {
         }
       } else {//if this grid cell empty
         // double sum = ph0.GetRegionE();//take E of region in grid
-        ph0.GetFattestNbr();//take E of region in grid
+        ph0.UpdateFertility();//take E of region in grid
         if (ph0.IsFertile()) {// mark cell for possible birth
           BirthList.add(ph0);
         }
@@ -243,13 +243,13 @@ public class Things {
       public int compare(Object o1, Object o2) {
         PlaceHolder s1 = (PlaceHolder) o1;
         PlaceHolder s2 = (PlaceHolder) o2;
-        return -Double.compare(s1.NbrHoodE, s2.NbrHoodE);// sort descending
+        return -Double.compare(s1.Fertility, s2.Fertility);// sort descending
       }
     });
 
     for (PlaceHolder ph : BirthList) {//now go down list, for each
-      double sum = ph.GetRegionE();//check all nbr E in grid0
-      if (sum >= BThresh)// if still above bthresh 
+      ph.UpdateFertility();//take E of region in grid
+      if (ph.IsFertile())// if neighborhood still has resources to create child 
       {
         Org Ctr = new Org(); // Birth
         MyGrid.Get(ph.MyDex).Ctr = Ctr;
