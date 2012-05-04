@@ -59,7 +59,7 @@ public class Things {
 
     public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
       g2.setColor(Color.BLACK);
-      g2.drawRect(XOrg, YOrg, 16, 16);
+      g2.fillRect(XOrg, YOrg, 16, 16);
     }
   }
 
@@ -83,7 +83,7 @@ public class Things {
     public Org GiveBirth() {
       Giver child = null;
       try {
-        child = (Giver) this.clone();
+        child = new Giver();// (Giver) this.clone();
       } catch (Exception ex) {
         return null;
       }
@@ -94,7 +94,7 @@ public class Things {
 
     public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
       g2.setColor(Color.green);
-      g2.drawRect(XOrg, YOrg, 16, 16);
+      g2.fillRect(XOrg, YOrg, 16, 16);
     }
   };
 
@@ -118,7 +118,7 @@ public class Things {
     public Org GiveBirth() {
       Taker child = null;
       try {
-        child = (Taker) this.clone();
+        child = new Taker();// (Taker) this.clone();
       } catch (Exception ex) {
         return null;
       }
@@ -129,7 +129,7 @@ public class Things {
 
     public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
       g2.setColor(Color.red);
-      g2.drawRect(XOrg, YOrg, 16, 16);
+      g2.fillRect(XOrg, YOrg, 16, 16);
     }
   };
   public static final Org[] OrgMaker = new Org[]{
@@ -158,6 +158,9 @@ public class Things {
       for (int nbrcnt = 0; nbrcnt < NumNbrs; nbrcnt++) {
         Soil ph = Nbrs[nbrcnt];
         double sampleE;
+        if (ph == null) {
+          boolean nop = true;
+        }
         sampleE = (ph.Ctr == null) ? 0.0 : ph.Ctr.GetSpareE();
         if (BestNbrE < sampleE) {
           BestCnt = 1;
@@ -238,13 +241,14 @@ public class Things {
     /* *************************************************************************************************** */
 
     public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
-      g2.setColor(Color.yellow);
+      //g2.setColor(Color.yellow);
+      g2.setColor(Color.black);
       g2.drawRect(XOrg, YOrg, 20, 20);
       if (this.Ctr != null) {
         this.Ctr.Draw_Me(g2, XOrg, YOrg);
       } else {
         g2.setColor(Color.black);
-        g2.fillRect(XOrg + 2, YOrg + 2, 16, 16);
+        // g2.fillRect(XOrg + 2, YOrg + 2, 16, 16);
       }
     }
   }
@@ -256,7 +260,7 @@ public class Things {
     public int Wdt, Hgt;
     /* *************************************************************************************************** */
 
-    public void Init(int WdtNew, int HgtNew) {
+    public void Init_Topology(int WdtNew, int HgtNew) {
       this.Wdt = WdtNew;
       this.Hgt = HgtNew;
       Sz = HgtNew * WdtNew;
@@ -283,7 +287,7 @@ public class Things {
             }
 
             for (int Xcnt = -1; Xcnt <= 1; Xcnt++) {
-              if ((Ycnt != 0) && (Xcnt != 0)) {
+              if (!(Ycnt == 0 && Xcnt == 0)) {
                 int NbrX = Col + Xcnt;
                 if (NbrX < 0) {
                   NbrX += Wdt;
@@ -296,6 +300,21 @@ public class Things {
             }
 
           }
+        }
+      }
+    }
+
+    /* *************************************************************************************************** */
+    public void Init_Seed() {
+      double Birth_Weight = LThresh * 3;// + BThresh;
+      for (int cnt = 0; cnt < this.Sz; cnt++) {
+        Soil box = this.Get(cnt);
+        if (rand.nextDouble() < 0.33) {
+          box.Ctr = new Giver();
+          box.Ctr.E = Birth_Weight;
+        } else if (rand.nextDouble() < 0.66) {
+          box.Ctr = new Taker();
+          box.Ctr.E = Birth_Weight;
         }
       }
     }

@@ -16,17 +16,21 @@ import java.awt.event.*;
  * git clone https://MultiTool@github.com/MultiTool/GiverTaker.git
  */
 public class GiverTaker extends JFrame {
+
   private JPanel MainPanel = new JPanel(); // North quadrant
   public static final Things.GridWorld world = new Things.GridWorld();
+
   public GiverTaker() {
     this.setSize(500, 500);
     setTitle("");
   }
+
   /**
    * @param args the command line arguments
    */
   public static void main(String[] args) {
-    world.Init(20, 20);
+    world.Init_Topology(20, 20);
+    world.Init_Seed();
     if (false) {
       GiverTaker window = new GiverTaker();
       window.setVisible(true);
@@ -34,16 +38,22 @@ public class GiverTaker extends JFrame {
     } else {
       JFrame frame = new JFrame("GiverTaker");
       JPanel MainPanel = new JPanel() {
+
         @Override
         public void paintComponent(Graphics g) {
           super.paintComponent(g);
           Graphics2D g2 = (Graphics2D) g;
           world.Draw_Me(g2, 10, 10);
-          boolean nop = true;
+          try {
+            Thread.sleep(1000);
+          } catch (Exception ex) {
+          }
+          world.NacerMorir();
+          this.repaint();
         }
       };
       //MainPanel.setSize(500, 500);
-      MainPanel.setBackground(Color.red);
+      MainPanel.setBackground(Color.white);
       frame.getContentPane().add(MainPanel);
       frame.setSize(500, 500);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
