@@ -15,6 +15,8 @@ import java.util.*;
 /**
  *
  * @author MultiTool
+ * To git:
+ * git clone https://MultiTool@github.com/MultiTool/GiverTaker.git
  */
 public class Things {
   public Things() {

@@ -12,6 +12,8 @@ import java.awt.event.*;
 /**
  *
  * @author MultiTool
+ * To git:
+ * git clone https://MultiTool@github.com/MultiTool/GiverTaker.git
  */
 public class GiverTaker extends JFrame {
   private JPanel MainPanel = new JPanel(); // North quadrant
