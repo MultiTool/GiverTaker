@@ -29,7 +29,14 @@ public class GiverTaker extends JFrame {
       window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     } else {
       JFrame frame = new JFrame("GiverTaker");
-      JPanel MainPanel = new JPanel();
+      JPanel MainPanel = new JPanel() {
+        @Override
+        public void paintComponent(Graphics g) {
+          super.paintComponent(g);
+          Graphics2D g2 = (Graphics2D) g;
+          boolean nop = true;
+        }
+      };
       //MainPanel.setSize(500, 500);
       MainPanel.setBackground(Color.red);
       frame.getContentPane().add(MainPanel);
