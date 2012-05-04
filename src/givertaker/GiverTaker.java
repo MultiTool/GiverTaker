@@ -17,6 +17,7 @@ import java.awt.event.*;
  */
 public class GiverTaker extends JFrame {
   private JPanel MainPanel = new JPanel(); // North quadrant
+  public static final Things.GridWorld world = new Things.GridWorld();
   public GiverTaker() {
     this.setSize(500, 500);
     setTitle("");
@@ -25,6 +26,7 @@ public class GiverTaker extends JFrame {
    * @param args the command line arguments
    */
   public static void main(String[] args) {
+    world.Init(20, 20);
     if (false) {
       GiverTaker window = new GiverTaker();
       window.setVisible(true);
@@ -36,6 +38,7 @@ public class GiverTaker extends JFrame {
         public void paintComponent(Graphics g) {
           super.paintComponent(g);
           Graphics2D g2 = (Graphics2D) g;
+          world.Draw_Me(g2, 10, 10);
           boolean nop = true;
         }
       };
