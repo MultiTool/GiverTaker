@@ -4,16 +4,39 @@
  */
 package givertaker;
 
+import javax.swing.*;
+import javax.swing.event.*;
+import java.awt.*;
+import java.awt.event.*;
+
 /**
  *
  * @author MultiTool
  */
-public class GiverTaker {
-
+public class GiverTaker extends JFrame {
+  private JPanel MainPanel = new JPanel(); // North quadrant
+  public GiverTaker() {
+    this.setSize(500, 500);
+    setTitle("");
+  }
   /**
    * @param args the command line arguments
    */
   public static void main(String[] args) {
-    // TODO code application logic here
+    if (false) {
+      GiverTaker window = new GiverTaker();
+      window.setVisible(true);
+      window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    } else {
+      JFrame frame = new JFrame("GiverTaker");
+      JPanel MainPanel = new JPanel();
+      //MainPanel.setSize(500, 500);
+      MainPanel.setBackground(Color.red);
+      frame.getContentPane().add(MainPanel);
+      frame.setSize(500, 500);
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      //frame.pack();
+      frame.setVisible(true);
+    }
   }
 }
