@@ -19,24 +19,32 @@ import java.util.*;
  * git clone https://MultiTool@github.com/MultiTool/GiverTaker.git
  */
 public class Things {
+
   public Things() {
   }
+
   public enum OrgType {
+
     Giver, Taker
   };
   public static final int GiverType = 0, TakerType = 1, NumTypes = 2;
   public static Random rand = new Random();
   public static final Double LThresh = 0.5;
   public static final Double BThresh = LThresh + 0.5;
+
   public static class Org {
+
     public int MyType; // OrgType MyType;
     public double E;
+
     public double GetSpareE() {// food above survival level
       return this.E - LThresh;
     }
+
     public boolean IsMoribund() {
       return this.E < LThresh;// if E not enough to live
     }
+
     public Org CopyMe() {
       try {
         return (Org) this.clone();
@@ -44,12 +52,24 @@ public class Things {
         return null;
       }
     }
+
+    public Org GiveBirth() {
+      return null;
+    }
+
+    public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
+      g2.setColor(Color.BLACK);
+      g2.drawRect(XOrg, YOrg, 16, 16);
+    }
   }
+
   public static class Giver extends Org {
+
     @Override
     public double GetSpareE() {// food above survival level
       return this.E - LThresh;
     }
+
     @Override
     public Org CopyMe() {
       try {
@@ -58,12 +78,33 @@ public class Things {
         return null;
       }
     }
+
+    @Override
+    public Org GiveBirth() {
+      Giver child = null;
+      try {
+        child = (Giver) this.clone();
+      } catch (Exception ex) {
+        return null;
+      }
+      child.E = LThresh;/* Give the child LThresh, and bill the parent. */
+      this.E -= child.E;
+      return child;
+    }
+
+    public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
+      g2.setColor(Color.green);
+      g2.drawRect(XOrg, YOrg, 16, 16);
+    }
   };
+
   public static class Taker extends Org {
+
     @Override
     public double GetSpareE() {// food above survival level
       return this.E - LThresh;
     }
+
     @Override
     public Org CopyMe() {
       try {
@@ -71,6 +112,24 @@ public class Things {
       } catch (Exception ex) {
         return null;
       }
+    }
+
+    @Override
+    public Org GiveBirth() {
+      Taker child = null;
+      try {
+        child = (Taker) this.clone();
+      } catch (Exception ex) {
+        return null;
+      }
+      child.E = LThresh;/* Give the child LThresh, and bill the parent. */
+      this.E -= child.E;
+      return child;
+    }
+
+    public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
+      g2.setColor(Color.red);
+      g2.drawRect(XOrg, YOrg, 16, 16);
     }
   };
   public static final Org[] OrgMaker = new Org[]{
@@ -80,21 +139,24 @@ public class Things {
   //private static final OrgType[] Num2Type = new OrgType[]{OrgType.Giver,OrgType.Taker};
   //private static final HashMap<OrgType,Integer > Type2Num = new HashMap<OrgType,Integer >();
   /* *************************************************************************************************** */
-  public static class PlaceHolder {
+
+  public static class Soil {
+
     public Org Ctr;
     public int MyDex;
-    public PlaceHolder FattestNbr;
+    public Soil FattestNbr;
     public double Fertility = 0.0;
     public final int NumNbrs = 8;
-    public PlaceHolder[] Nbrs = new PlaceHolder[NumNbrs];
+    public Soil[] Nbrs = new Soil[NumNbrs];
     /* *************************************************************************************************** */
-    public PlaceHolder UpdateFertility() {
-      PlaceHolder BestNbr = null;
+
+    public Soil UpdateFertility() {
+      Soil BestNbr = null;
       double BestNbrE = -1.0;
       int BestCnt = 0;
       // Pick the fattest neighbor. If there is a tie, pick randomly from among the best.
       for (int nbrcnt = 0; nbrcnt < NumNbrs; nbrcnt++) {
-        PlaceHolder ph = Nbrs[nbrcnt];
+        Soil ph = Nbrs[nbrcnt];
         double sampleE;
         sampleE = (ph.Ctr == null) ? 0.0 : ph.Ctr.GetSpareE();
         if (BestNbrE < sampleE) {
@@ -115,6 +177,7 @@ public class Things {
       return BestNbr;
     }
     /* *************************************************************************************************** */
+
     public boolean IsFertile() {
       if (Fertility >= BThresh) {// wrong!! work this out right.
         return true;
@@ -122,37 +185,36 @@ public class Things {
       return false;
     }
     /* *************************************************************************************************** */
+
     public void AcceptChild() {
-      Org child = this.FattestNbr.Ctr.CopyMe();// Birth
-      /*
-       * now give the child LThresh, and bill the parent.
-       * 
-       */
+      Org child = this.FattestNbr.Ctr.GiveBirth();// Birth
       this.Ctr = child;
     }
     /* *************************************************************************************************** */
+
     public void Vacate() {
-      // delete ph.Ctr
-      this.Ctr = null;
+      this.Ctr = null;// delete this.Ctr
       this.Fertility = 0;
     }
     /* *************************************************************************************************** */
+
     public double GetRegionE() {
       double NbrE = 0;
       for (int nbrcnt = 0; nbrcnt < NumNbrs; nbrcnt++) {
-        PlaceHolder ph = Nbrs[nbrcnt];
-        if (ph.Ctr != null) {
-          NbrE += ph.Ctr.E;
+        Soil Nbr = Nbrs[nbrcnt];
+        if (Nbr.Ctr != null) {
+          NbrE += Nbr.Ctr.E;
         }
       }
       this.Fertility = NbrE;
       return NbrE;
     }
     /* *************************************************************************************************** */
+
     public double Spawn() {
       double[] NbrEList = new double[NumTypes];
       for (int nbrcnt = 0; nbrcnt < NumNbrs; nbrcnt++) {
-        PlaceHolder PhNbr = Nbrs[nbrcnt];
+        Soil PhNbr = Nbrs[nbrcnt];
         if (PhNbr.Ctr != null) {
           NbrEList[PhNbr.Ctr.MyType] += PhNbr.Ctr.E;
         }
@@ -174,14 +236,26 @@ public class Things {
       return MaxFat;
     }
     /* *************************************************************************************************** */
-    public void Draw_Me(Graphics2D g2, int XLoc, int YLoc) {
+
+    public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
+      g2.setColor(Color.yellow);
+      g2.drawRect(XOrg, YOrg, 20, 20);
+      if (this.Ctr != null) {
+        this.Ctr.Draw_Me(g2, XOrg, YOrg);
+      } else {
+        g2.setColor(Color.black);
+        g2.fillRect(XOrg + 2, YOrg + 2, 16, 16);
+      }
     }
   }
   /* *************************************************************************************************** */
-  public static class GridWorld extends ArrayList<PlaceHolder> {
+
+  public static class GridWorld extends ArrayList<Soil> {
+
     public int Sz;
     public int Wdt, Hgt;
     /* *************************************************************************************************** */
+
     public void Init(int WdtNew, int HgtNew) {
       this.Wdt = WdtNew;
       this.Hgt = HgtNew;
@@ -189,7 +263,7 @@ public class Things {
 
       // fill cells
       for (int cnt = 0; cnt < Sz; cnt++) {
-        PlaceHolder ph = new PlaceHolder();
+        Soil ph = new Soil();
         ph.MyDex = cnt;
         this.add(ph);
       }
@@ -197,7 +271,7 @@ public class Things {
       // connect here
       for (int Row = 0; Row < Hgt; Row++) {
         for (int Col = 0; Col < Wdt; Col++) {
-          PlaceHolder ctr = this.Get(Col, Row);// get self
+          Soil ctr = this.Get(Col, Row);// get self
 
           int localcnt = 0;
           for (int Ycnt = -1; Ycnt <= 1; Ycnt++) {
@@ -225,66 +299,73 @@ public class Things {
         }
       }
     }
-    public PlaceHolder Get(int Col, int Row) {
+
+    public Soil Get(int Col, int Row) {
       int Dex = Row * Wdt + Col;
       return this.get(Dex);
     }
-    public PlaceHolder Get(int Dex) {
+
+    public Soil Get(int Dex) {
       return this.get(Dex);
     }
+
     public int GetSz() {
       return Sz;
     }
     /* *************************************************************************************************** */
-    public void Draw_Me(Graphics2D g2, int XLoc, int YLoc) {
+
+    public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
       for (int Row = 0; Row < Hgt; Row++) {
         for (int Col = 0; Col < Wdt; Col++) {
-          PlaceHolder cell = this.Get(Col, Row);
-          cell.Draw_Me(g2, XLoc + Col * 20, YLoc + Row * 20);
+          Soil cell = this.Get(Col, Row);
+          cell.Draw_Me(g2, XOrg + Col * 20, YOrg + Row * 20);
         }
       }
     }
-  }
-  /* *************************************************************************************************** */
-  public void SingleGrid(GridWorld MyGrid) {// this is the copy part
-    ArrayList<PlaceHolder> BirthList = new ArrayList<PlaceHolder>();
-    ArrayList<PlaceHolder> DeathList = new ArrayList<PlaceHolder>();
-    int Sz = MyGrid.GetSz();
-    for (int cnt = 0; cnt < Sz; cnt++) {
-      PlaceHolder ph = MyGrid.Get(cnt);
-      if (ph.Ctr != null)// if my grid cell full:
-      {
-        if (ph.Ctr.IsMoribund()) {//if E not enough to live
-          DeathList.add(ph);// mark for death
+    /* *************************************************************************************************** */
+
+    public void NacerMorir() {// To every thing, turn, turn
+      GridWorld MyGrid = this;
+      ArrayList<Soil> BirthList = new ArrayList<Soil>();
+      ArrayList<Soil> DeathList = new ArrayList<Soil>();
+      int Sz = MyGrid.GetSz();
+      for (int cnt = 0; cnt < Sz; cnt++) {
+        Soil ph = MyGrid.Get(cnt);
+        if (ph.Ctr != null)// if my grid cell full:
+        {
+          if (ph.Ctr.IsMoribund()) {//if E not enough to live
+            DeathList.add(ph);// mark for death
+          }
+        } else {//if this grid cell empty
+          ph.UpdateFertility();// take E of region in grid
+          if (ph.IsFertile()) {// mark cell for possible birth
+            BirthList.add(ph);
+          }
         }
-      } else {//if this grid cell empty
-        ph.UpdateFertility();//take E of region in grid
-        if (ph.IsFertile()) {// mark cell for possible birth
-          BirthList.add(ph);
+      }
+
+      Collections.shuffle(BirthList);// randomize to prevent spatial bias in birth order
+      Collections.sort(BirthList, new Comparator() {// sort by sum E here.
+
+        @Override
+        public int compare(Object o1, Object o2) {
+          Soil s1 = (Soil) o1;
+          Soil s2 = (Soil) o2;
+          return -Double.compare(s1.Fertility, s2.Fertility);// sort descending
+        }
+      });
+
+      for (Soil ph : BirthList) {//now go down list, for each
+        ph.UpdateFertility();// take E of region in grid
+        if (ph.IsFertile())// if neighborhood still has resources to create child here
+        {
+          ph.AcceptChild();
         }
       }
-    }
 
-    Collections.shuffle(BirthList);// randomize to prevent spatial bias in birth order
-    Collections.sort(BirthList, new Comparator() {// sort by sum E here.
-      @Override
-      public int compare(Object o1, Object o2) {
-        PlaceHolder s1 = (PlaceHolder) o1;
-        PlaceHolder s2 = (PlaceHolder) o2;
-        return -Double.compare(s1.Fertility, s2.Fertility);// sort descending
+      for (Soil ph : DeathList) {// Drag away the corpses.
+        ph.Vacate();
       }
-    });
-
-    for (PlaceHolder ph : BirthList) {//now go down list, for each
-      ph.UpdateFertility();// take E of region in grid
-      if (ph.IsFertile())// if neighborhood still has resources to create child 
-      {
-        ph.AcceptChild();
-      }
-    }
-
-    for (PlaceHolder ph : DeathList) {//now go down list, for each
-      ph.Vacate();
     }
   }
 }
