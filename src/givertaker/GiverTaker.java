@@ -37,6 +37,26 @@ public class GiverTaker extends JFrame {
       window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     } else {
       JFrame frame = new JFrame("GiverTaker");
+      frame.addKeyListener(null);
+
+      frame.addKeyListener(new KeyListener() {
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+          if (e.getKeyChar() == e.VK_ESCAPE) {
+            System.exit(0);
+          }
+        }
+        // unused abstract methods 
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+        }
+
+        public void keyReleased(KeyEvent e) {
+        }
+      });
+
       JPanel MainPanel = new JPanel() {
 
         @Override
@@ -45,10 +65,10 @@ public class GiverTaker extends JFrame {
           Graphics2D g2 = (Graphics2D) g;
           world.Draw_Me(g2, 10, 10);
           try {
-            Thread.sleep(1000);
+            Thread.sleep(10);
           } catch (Exception ex) {
           }
-          world.NacerMorir();
+          world.Run_Cycle();
           this.repaint();
         }
       };

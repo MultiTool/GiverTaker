@@ -29,8 +29,8 @@ public class Things {
   };
   public static final int GiverType = 0, TakerType = 1, NumTypes = 2;
   public static Random rand = new Random();
-  public static final Double LThresh = 0.5;
-  public static final Double BThresh = LThresh + 0.5;
+  public static final Double LThresh = 1.0;
+  public static final Double BThresh = LThresh * 2.0;
 
   public static class Org {
 
@@ -43,6 +43,9 @@ public class Things {
 
     public boolean IsMoribund() {
       return this.E < LThresh;// if E not enough to live
+    }
+
+    public void Interact(Org Nbr) {
     }
 
     public Org CopyMe() {
@@ -65,9 +68,20 @@ public class Things {
 
   public static class Giver extends Org {
 
+    double YouGetQuant = 0.4;
+    double IGiveQuant = 0.1;
+
     @Override
     public double GetSpareE() {// food above survival level
       return this.E - LThresh;
+    }
+
+    @Override
+    public void Interact(Org Nbr) {
+      if (this.E > 0.0) {
+        Nbr.E += YouGetQuant;
+        this.E -= IGiveQuant;
+      }
     }
 
     @Override
@@ -100,9 +114,20 @@ public class Things {
 
   public static class Taker extends Org {
 
+    double IGetQuant = 0.1;
+    double YouLoseQuant = 0.4;
+
     @Override
     public double GetSpareE() {// food above survival level
       return this.E - LThresh;
+    }
+
+    @Override
+    public void Interact(Org Nbr) {
+      if (Nbr.E > 0.0) {
+        Nbr.E -= YouLoseQuant;
+        this.E += IGetQuant;
+      }
     }
 
     @Override
@@ -240,6 +265,17 @@ public class Things {
     }
     /* *************************************************************************************************** */
 
+    public void Interact() {
+      if (this.Ctr != null) {
+        for (Soil Nbr : this.Nbrs) {
+          if (Nbr.Ctr != null) {
+            this.Ctr.Interact(Nbr.Ctr);
+          }
+        }
+      }
+    }
+    /* *************************************************************************************************** */
+
     public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
       //g2.setColor(Color.yellow);
       g2.setColor(Color.black);
@@ -258,6 +294,9 @@ public class Things {
 
     public int Sz;
     public int Wdt, Hgt;
+    ArrayList<Soil> BirthList = new ArrayList<Soil>();
+    ArrayList<Soil> DeathList = new ArrayList<Soil>();
+    Soil[] ShuffleDex;
     /* *************************************************************************************************** */
 
     public void Init_Topology(int WdtNew, int HgtNew) {
@@ -265,11 +304,14 @@ public class Things {
       this.Hgt = HgtNew;
       Sz = HgtNew * WdtNew;
 
+      ShuffleDex = new Soil[Sz];
+
       // fill cells
       for (int cnt = 0; cnt < Sz; cnt++) {
         Soil ph = new Soil();
         ph.MyDex = cnt;
         this.add(ph);
+        ShuffleDex[cnt] = ph;
       }
 
       // connect here
@@ -306,13 +348,14 @@ public class Things {
 
     /* *************************************************************************************************** */
     public void Init_Seed() {
-      double Birth_Weight = LThresh * 3;// + BThresh;
+      double Birth_Weight = LThresh * 1;// + BThresh;
       for (int cnt = 0; cnt < this.Sz; cnt++) {
         Soil box = this.Get(cnt);
-        if (rand.nextDouble() < 0.33) {
+        double chance = rand.nextDouble();
+        if (chance < 0.33) {
           box.Ctr = new Giver();
           box.Ctr.E = Birth_Weight;
-        } else if (rand.nextDouble() < 0.66) {
+        } else if (chance < 0.66) {
           box.Ctr = new Taker();
           box.Ctr.E = Birth_Weight;
         }
@@ -343,10 +386,33 @@ public class Things {
     }
     /* *************************************************************************************************** */
 
+    public void Run_Cycle() {
+      this.Interact();
+      this.NacerMorir();
+    }
+    /* *************************************************************************************************** */
+
+    public void Interact() {
+      double Entropy = 0.1;
+      Collections.shuffle(Arrays.asList(ShuffleDex));// shuffle to prevent spatial bias in order
+      for (int cnt = 0; cnt < this.Sz; cnt++) {
+        Soil sl = this.ShuffleDex[cnt];
+        if (sl.Ctr != null) {
+          sl.Ctr.E -= Entropy;
+        }
+        sl.Interact();
+      }
+      for (int cnt = 0; cnt < this.Sz; cnt++) {
+        Soil sl = this.ShuffleDex[cnt];
+        sl.Interact();
+      }
+    }
+    /* *************************************************************************************************** */
+
     public void NacerMorir() {// To every thing, turn, turn
       GridWorld MyGrid = this;
-      ArrayList<Soil> BirthList = new ArrayList<Soil>();
-      ArrayList<Soil> DeathList = new ArrayList<Soil>();
+      BirthList = new ArrayList<Soil>();
+      DeathList = new ArrayList<Soil>();
       int Sz = MyGrid.GetSz();
       for (int cnt = 0; cnt < Sz; cnt++) {
         Soil ph = MyGrid.Get(cnt);
