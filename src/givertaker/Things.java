@@ -20,6 +20,12 @@ import java.util.*;
  */
 public class Things {
 
+  public static final int CellWdt = 10, CellHgt = 10;
+  public static final int OrgBorder = 1;
+  public static int OrgWdt = CellWdt - OrgBorder * 2, OrgHgt = CellHgt - OrgBorder * 2;
+  public static double DramaFactor = 0.2;// magnifies size of transactions
+  public static double Entropy = 0.05 * DramaFactor;
+
   public Things() {
   }
 
@@ -48,28 +54,20 @@ public class Things {
     public void Interact(Org Nbr) {
     }
 
-    public Org CopyMe() {
-      try {
-        return (Org) this.clone();
-      } catch (Exception ex) {
-        return null;
-      }
-    }
-
     public Org GiveBirth() {
       return null;
     }
 
     public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
       g2.setColor(Color.BLACK);
-      g2.fillRect(XOrg, YOrg, 16, 16);
+      g2.fillRect(XOrg + OrgBorder, YOrg + OrgBorder, OrgWdt, OrgHgt);
     }
   }
 
   public static class Giver extends Org {
 
-    double YouGetQuant = 0.4;
-    double IGiveQuant = 0.1;
+    double YouGetQuant = 0.4 * DramaFactor;
+    double IGiveQuant = 0.1 * DramaFactor;
 
     @Override
     public double GetSpareE() {// food above survival level
@@ -81,15 +79,6 @@ public class Things {
       if (this.E > 0.0) {
         Nbr.E += YouGetQuant;
         this.E -= IGiveQuant;
-      }
-    }
-
-    @Override
-    public Org CopyMe() {
-      try {
-        return (Giver) this.clone();
-      } catch (Exception ex) {
-        return null;
       }
     }
 
@@ -108,14 +97,14 @@ public class Things {
 
     public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
       g2.setColor(Color.green);
-      g2.fillRect(XOrg, YOrg, 16, 16);
+      g2.fillRect(XOrg + OrgBorder, YOrg + OrgBorder, OrgWdt, OrgHgt);
     }
   };
 
   public static class Taker extends Org {
 
-    double IGetQuant = 0.1;
-    double YouLoseQuant = 0.4;
+    double IGetQuant = 0.1 * DramaFactor;
+    double YouLoseQuant = 0.4 * DramaFactor;
 
     @Override
     public double GetSpareE() {// food above survival level
@@ -127,15 +116,6 @@ public class Things {
       if (Nbr.E > 0.0) {
         Nbr.E -= YouLoseQuant;
         this.E += IGetQuant;
-      }
-    }
-
-    @Override
-    public Org CopyMe() {
-      try {
-        return (Taker) this.clone();
-      } catch (Exception ex) {
-        return null;
       }
     }
 
@@ -154,7 +134,7 @@ public class Things {
 
     public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
       g2.setColor(Color.red);
-      g2.fillRect(XOrg, YOrg, 16, 16);
+      g2.fillRect(XOrg + OrgBorder, YOrg + OrgBorder, OrgWdt, OrgHgt);
     }
   };
   public static final Org[] OrgMaker = new Org[]{
@@ -183,9 +163,6 @@ public class Things {
       for (int nbrcnt = 0; nbrcnt < NumNbrs; nbrcnt++) {
         Soil ph = Nbrs[nbrcnt];
         double sampleE;
-        if (ph == null) {
-          boolean nop = true;
-        }
         sampleE = (ph.Ctr == null) ? 0.0 : ph.Ctr.GetSpareE();
         if (BestNbrE < sampleE) {
           BestCnt = 1;
@@ -239,7 +216,7 @@ public class Things {
     }
     /* *************************************************************************************************** */
 
-    public double Spawn() {
+    public double Spawn() {// alternate way, all neighbors contribute to child
       double[] NbrEList = new double[NumTypes];
       for (int nbrcnt = 0; nbrcnt < NumNbrs; nbrcnt++) {
         Soil PhNbr = Nbrs[nbrcnt];
@@ -272,6 +249,7 @@ public class Things {
             this.Ctr.Interact(Nbr.Ctr);
           }
         }
+        this.Ctr.E -= Entropy;
       }
     }
     /* *************************************************************************************************** */
@@ -279,12 +257,9 @@ public class Things {
     public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
       //g2.setColor(Color.yellow);
       g2.setColor(Color.black);
-      g2.drawRect(XOrg, YOrg, 20, 20);
+      g2.drawRect(XOrg, YOrg, CellWdt, CellHgt);
       if (this.Ctr != null) {
         this.Ctr.Draw_Me(g2, XOrg, YOrg);
-      } else {
-        g2.setColor(Color.black);
-        // g2.fillRect(XOrg + 2, YOrg + 2, 16, 16);
       }
     }
   }
@@ -297,6 +272,12 @@ public class Things {
     ArrayList<Soil> BirthList = new ArrayList<Soil>();
     ArrayList<Soil> DeathList = new ArrayList<Soil>();
     Soil[] ShuffleDex;
+    /* *************************************************************************************************** */
+
+    public void Init() {
+      Init_Topology(20, 20);
+      Init_Seed();
+    }
     /* *************************************************************************************************** */
 
     public void Init_Topology(int WdtNew, int HgtNew) {
@@ -380,7 +361,7 @@ public class Things {
       for (int Row = 0; Row < Hgt; Row++) {
         for (int Col = 0; Col < Wdt; Col++) {
           Soil cell = this.Get(Col, Row);
-          cell.Draw_Me(g2, XOrg + Col * 20, YOrg + Row * 20);
+          cell.Draw_Me(g2, XOrg + Col * CellWdt, YOrg + Row * CellHgt);
         }
       }
     }
@@ -393,15 +374,7 @@ public class Things {
     /* *************************************************************************************************** */
 
     public void Interact() {
-      double Entropy = 0.1;
       Collections.shuffle(Arrays.asList(ShuffleDex));// shuffle to prevent spatial bias in order
-      for (int cnt = 0; cnt < this.Sz; cnt++) {
-        Soil sl = this.ShuffleDex[cnt];
-        if (sl.Ctr != null) {
-          sl.Ctr.E -= Entropy;
-        }
-        sl.Interact();
-      }
       for (int cnt = 0; cnt < this.Sz; cnt++) {
         Soil sl = this.ShuffleDex[cnt];
         sl.Interact();

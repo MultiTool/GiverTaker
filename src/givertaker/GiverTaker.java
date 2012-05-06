@@ -29,7 +29,7 @@ public class GiverTaker extends JFrame {
    * @param args the command line arguments
    */
   public static void main(String[] args) {
-    world.Init_Topology(20, 20);
+    world.Init_Topology(40, 40);
     world.Init_Seed();
     if (false) {
       GiverTaker window = new GiverTaker();
@@ -37,8 +37,6 @@ public class GiverTaker extends JFrame {
       window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     } else {
       JFrame frame = new JFrame("GiverTaker");
-      frame.addKeyListener(null);
-
       frame.addKeyListener(new KeyListener() {
 
         @Override
@@ -56,14 +54,18 @@ public class GiverTaker extends JFrame {
         public void keyReleased(KeyEvent e) {
         }
       });
-
+      if (false) {
+        JLabel Census = new JLabel();
+        Census.setText("Givers: Takers:");
+        frame.getContentPane().add(Census);
+      }
       JPanel MainPanel = new JPanel() {
 
         @Override
         public void paintComponent(Graphics g) {
           super.paintComponent(g);
           Graphics2D g2 = (Graphics2D) g;
-          world.Draw_Me(g2, 10, 10);
+          world.Draw_Me(g2, 10, 30);
           try {
             Thread.sleep(10);
           } catch (Exception ex) {
