@@ -19,61 +19,47 @@ import java.util.*;
  * git clone https://MultiTool@github.com/MultiTool/GiverTaker.git
  */
 public class Things {
-
   public static final int CellWdt = 10, CellHgt = 10;
   public static final int OrgBorder = 1;
   public static int OrgWdt = CellWdt - OrgBorder * 2, OrgHgt = CellHgt - OrgBorder * 2;
   public static double DramaFactor = 0.2;// magnifies size of transactions
   public static double Entropy = 0.05 * DramaFactor;
-
+  public static final Double Grace = 0.2;// to keep Takers from eating their children right away
+  public static final Double LThresh = 1.0;
+  public static final Double BThresh = LThresh * 2.0 + Grace * 2.0;
+  public static Random rand = new Random();
   public Things() {
   }
-
   public enum OrgType {
-
     Giver, Taker
   };
   public static final int GiverType = 0, TakerType = 1, NumTypes = 2;
-  public static Random rand = new Random();
-  public static final Double LThresh = 1.0;
-  public static final Double BThresh = LThresh * 2.0;
-
   public static class Org {
-
     public int MyType; // OrgType MyType;
     public double E;
-
     public double GetSpareE() {// food above survival level
       return this.E - LThresh;
     }
-
     public boolean IsMoribund() {
       return this.E < LThresh;// if E not enough to live
     }
-
     public void Interact(Org Nbr) {
     }
-
     public Org GiveBirth() {
       return null;
     }
-
     public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
       g2.setColor(Color.BLACK);
       g2.fillRect(XOrg + OrgBorder, YOrg + OrgBorder, OrgWdt, OrgHgt);
     }
   }
-
   public static class Giver extends Org {
-
     double YouGetQuant = 0.4 * DramaFactor;
     double IGiveQuant = 0.1 * DramaFactor;
-
     @Override
     public double GetSpareE() {// food above survival level
       return this.E - LThresh;
     }
-
     @Override
     public void Interact(Org Nbr) {
       if (this.E > 0.0) {
@@ -81,7 +67,6 @@ public class Things {
         this.E -= IGiveQuant;
       }
     }
-
     @Override
     public Org GiveBirth() {
       Giver child = null;
@@ -90,27 +75,22 @@ public class Things {
       } catch (Exception ex) {
         return null;
       }
-      child.E = LThresh;/* Give the child LThresh, and bill the parent. */
+      child.E = LThresh + Grace;/* Give the child LThresh, and bill the parent. */
       this.E -= child.E;
       return child;
     }
-
     public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
       g2.setColor(Color.green);
       g2.fillRect(XOrg + OrgBorder, YOrg + OrgBorder, OrgWdt, OrgHgt);
     }
   };
-
   public static class Taker extends Org {
-
     double IGetQuant = 0.1 * DramaFactor;
     double YouLoseQuant = 0.4 * DramaFactor;
-
     @Override
     public double GetSpareE() {// food above survival level
       return this.E - LThresh;
     }
-
     @Override
     public void Interact(Org Nbr) {
       if (Nbr.E > 0.0) {
@@ -118,7 +98,6 @@ public class Things {
         this.E += IGetQuant;
       }
     }
-
     @Override
     public Org GiveBirth() {
       Taker child = null;
@@ -127,11 +106,10 @@ public class Things {
       } catch (Exception ex) {
         return null;
       }
-      child.E = LThresh;/* Give the child LThresh, and bill the parent. */
+      child.E = LThresh + Grace;/* Give the child LThresh, and bill the parent. */
       this.E -= child.E;
       return child;
     }
-
     public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
       g2.setColor(Color.red);
       g2.fillRect(XOrg + OrgBorder, YOrg + OrgBorder, OrgWdt, OrgHgt);
@@ -144,9 +122,7 @@ public class Things {
   //private static final OrgType[] Num2Type = new OrgType[]{OrgType.Giver,OrgType.Taker};
   //private static final HashMap<OrgType,Integer > Type2Num = new HashMap<OrgType,Integer >();
   /* *************************************************************************************************** */
-
   public static class Soil {
-
     public Org Ctr;
     public int MyDex;
     public Soil FattestNbr;
@@ -154,7 +130,6 @@ public class Things {
     public final int NumNbrs = 8;
     public Soil[] Nbrs = new Soil[NumNbrs];
     /* *************************************************************************************************** */
-
     public Soil UpdateFertility() {
       Soil BestNbr = null;
       double BestNbrE = -1.0;
@@ -182,7 +157,6 @@ public class Things {
       return BestNbr;
     }
     /* *************************************************************************************************** */
-
     public boolean IsFertile() {
       if (Fertility >= BThresh) {// wrong!! work this out right.
         return true;
@@ -190,19 +164,16 @@ public class Things {
       return false;
     }
     /* *************************************************************************************************** */
-
     public void AcceptChild() {
       Org child = this.FattestNbr.Ctr.GiveBirth();// Birth
       this.Ctr = child;
     }
     /* *************************************************************************************************** */
-
     public void Vacate() {
       this.Ctr = null;// delete this.Ctr
       this.Fertility = 0;
     }
     /* *************************************************************************************************** */
-
     public double GetRegionE() {
       double NbrE = 0;
       for (int nbrcnt = 0; nbrcnt < NumNbrs; nbrcnt++) {
@@ -215,7 +186,6 @@ public class Things {
       return NbrE;
     }
     /* *************************************************************************************************** */
-
     public double Spawn() {// alternate way, all neighbors contribute to child
       double[] NbrEList = new double[NumTypes];
       for (int nbrcnt = 0; nbrcnt < NumNbrs; nbrcnt++) {
@@ -241,7 +211,6 @@ public class Things {
       return MaxFat;
     }
     /* *************************************************************************************************** */
-
     public void Interact() {
       if (this.Ctr != null) {
         for (Soil Nbr : this.Nbrs) {
@@ -253,7 +222,6 @@ public class Things {
       }
     }
     /* *************************************************************************************************** */
-
     public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
       //g2.setColor(Color.yellow);
       g2.setColor(Color.black);
@@ -264,22 +232,18 @@ public class Things {
     }
   }
   /* *************************************************************************************************** */
-
   public static class GridWorld extends ArrayList<Soil> {
-
     public int Sz;
     public int Wdt, Hgt;
     ArrayList<Soil> BirthList = new ArrayList<Soil>();
     ArrayList<Soil> DeathList = new ArrayList<Soil>();
     Soil[] ShuffleDex;
     /* *************************************************************************************************** */
-
     public void Init() {
       Init_Topology(20, 20);
       Init_Seed();
     }
     /* *************************************************************************************************** */
-
     public void Init_Topology(int WdtNew, int HgtNew) {
       this.Wdt = WdtNew;
       this.Hgt = HgtNew;
@@ -342,21 +306,17 @@ public class Things {
         }
       }
     }
-
     public Soil Get(int Col, int Row) {
       int Dex = Row * Wdt + Col;
       return this.get(Dex);
     }
-
     public Soil Get(int Dex) {
       return this.get(Dex);
     }
-
     public int GetSz() {
       return Sz;
     }
     /* *************************************************************************************************** */
-
     public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
       for (int Row = 0; Row < Hgt; Row++) {
         for (int Col = 0; Col < Wdt; Col++) {
@@ -366,13 +326,11 @@ public class Things {
       }
     }
     /* *************************************************************************************************** */
-
     public void Run_Cycle() {
       this.Interact();
       this.NacerMorir();
     }
     /* *************************************************************************************************** */
-
     public void Interact() {
       Collections.shuffle(Arrays.asList(ShuffleDex));// shuffle to prevent spatial bias in order
       for (int cnt = 0; cnt < this.Sz; cnt++) {
@@ -381,7 +339,6 @@ public class Things {
       }
     }
     /* *************************************************************************************************** */
-
     public void NacerMorir() {// To every thing, turn, turn
       GridWorld MyGrid = this;
       BirthList = new ArrayList<Soil>();
@@ -404,7 +361,6 @@ public class Things {
 
       Collections.shuffle(BirthList);// randomize to prevent spatial bias in birth order
       Collections.sort(BirthList, new Comparator() {// sort by sum E here.
-
         @Override
         public int compare(Object o1, Object o2) {
           Soil s1 = (Soil) o1;
