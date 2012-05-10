@@ -4,12 +4,8 @@
  */
 package givertaker;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-
-import java.awt.*;
-
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.util.*;
 
 /**
@@ -24,10 +20,10 @@ public class Things {
   public static int OrgWdt = CellWdt - OrgBorder * 2, OrgHgt = CellHgt - OrgBorder * 2;
   public static double DramaFactor = 0.2;// scales size of transactions
   public static double Entropy = 0.05 * DramaFactor;
+  // None of these values have to be the same for both giver and taker, but for now they are for convenience.
   public static final Double Grace = 0.5;// to keep Takers from eating their children right away
   public static final Double LThresh = 1.0;
   public static final Double BThresh = LThresh * 2.0 + Grace * 2.0;
-  // giver and taker self-impact vs social-impact do not have to be the same, but it is convenient
   public static final Double SelfImpact = 0.10;
   public static final Double SocialImpact = 0.15;
   public static Random rand = new Random();
@@ -37,9 +33,13 @@ public class Things {
     Giver, Taker
   };
   public static final int GiverType = 0, TakerType = 1, NumTypes = 2;
+  /* *************************************************************************************************** */
   public static class Org {
     public int MyType; // OrgType MyType;
     public double E;
+    public Org() {
+      this.MyType = -1;// GiverType TakerType 
+    }
     public double GetSpareE() {// food above survival level
       return this.E - LThresh;
     }
@@ -56,9 +56,13 @@ public class Things {
       g2.fillRect(XOrg + OrgBorder, YOrg + OrgBorder, OrgWdt, OrgHgt);
     }
   }
+  /* *************************************************************************************************** */
   public static class Giver extends Org {
-    double YouGetQuant = SocialImpact * DramaFactor;
-    double IGiveQuant = SelfImpact * DramaFactor;
+    static final double YouGetQuant = SocialImpact * DramaFactor;
+    static final double IGiveQuant = SelfImpact * DramaFactor;
+    public Giver() {
+      this.MyType = GiverType;
+    }
     @Override
     public double GetSpareE() {// food above survival level
       return this.E - LThresh;
@@ -87,9 +91,13 @@ public class Things {
       g2.fillRect(XOrg + OrgBorder, YOrg + OrgBorder, OrgWdt, OrgHgt);
     }
   };
+  /* *************************************************************************************************** */
   public static class Taker extends Org {
-    double IGetQuant = SelfImpact * DramaFactor;
-    double YouLoseQuant = SocialImpact * DramaFactor;
+    static final double IGetQuant = SelfImpact * DramaFactor;
+    static final double YouLoseQuant = SocialImpact * DramaFactor;
+    public Taker() {
+      this.MyType = TakerType;
+    }
     @Override
     public double GetSpareE() {// food above survival level
       return this.E - LThresh;
@@ -118,6 +126,7 @@ public class Things {
       g2.fillRect(XOrg + OrgBorder, YOrg + OrgBorder, OrgWdt, OrgHgt);
     }
   };
+  /* *************************************************************************************************** */
   public static final Org[] OrgMaker = new Org[]{
     new Giver(), new Taker()
   };
@@ -291,7 +300,6 @@ public class Things {
         }
       }
     }
-
     /* *************************************************************************************************** */
     public void Init_Seed() {
       double Birth_Weight = LThresh * 1.2;
@@ -384,6 +392,16 @@ public class Things {
 
       for (Soil ph : DeathList) {// Drag away the corpses.
         ph.Vacate();
+      }
+    }
+    /* *************************************************************************************************** */
+    public void Census() {
+      int[] CensusRay = new int[]{0, 0};// NumTypes
+      for (int cnt = 0; cnt < this.Sz; cnt++) {
+        Soil sl = this.Get(cnt);
+        if (sl.Ctr != null) {
+          CensusRay[sl.Ctr.MyType]++;
+        }
       }
     }
   }
