@@ -22,11 +22,14 @@ public class Things {
   public static final int CellWdt = 10, CellHgt = 10;
   public static final int OrgBorder = 1;
   public static int OrgWdt = CellWdt - OrgBorder * 2, OrgHgt = CellHgt - OrgBorder * 2;
-  public static double DramaFactor = 0.2;// magnifies size of transactions
+  public static double DramaFactor = 0.2;// scales size of transactions
   public static double Entropy = 0.05 * DramaFactor;
-  public static final Double Grace = 0.2;// to keep Takers from eating their children right away
+  public static final Double Grace = 0.5;// to keep Takers from eating their children right away
   public static final Double LThresh = 1.0;
   public static final Double BThresh = LThresh * 2.0 + Grace * 2.0;
+  // giver and taker self-weight vs social-weight do not have to be the same, but it is convenient
+  public static final Double SelfWeight = 0.10;
+  public static final Double SocialWeight = 0.16;
   public static Random rand = new Random();
   public Things() {
   }
@@ -54,8 +57,8 @@ public class Things {
     }
   }
   public static class Giver extends Org {
-    double YouGetQuant = 0.4 * DramaFactor;
-    double IGiveQuant = 0.1 * DramaFactor;
+    double YouGetQuant = SocialWeight * DramaFactor;
+    double IGiveQuant = SelfWeight * DramaFactor;
     @Override
     public double GetSpareE() {// food above survival level
       return this.E - LThresh;
@@ -85,8 +88,8 @@ public class Things {
     }
   };
   public static class Taker extends Org {
-    double IGetQuant = 0.1 * DramaFactor;
-    double YouLoseQuant = 0.4 * DramaFactor;
+    double IGetQuant = SelfWeight * DramaFactor;
+    double YouLoseQuant = SocialWeight * DramaFactor;
     @Override
     public double GetSpareE() {// food above survival level
       return this.E - LThresh;
@@ -118,9 +121,6 @@ public class Things {
   public static final Org[] OrgMaker = new Org[]{
     new Giver(), new Taker()
   };
-  // private static final HashMap<Integer, OrgType> Num2Type = new HashMap<Integer, OrgType>();
-  //private static final OrgType[] Num2Type = new OrgType[]{OrgType.Giver,OrgType.Taker};
-  //private static final HashMap<OrgType,Integer > Type2Num = new HashMap<OrgType,Integer >();
   /* *************************************************************************************************** */
   public static class Soil {
     public Org Ctr;
@@ -223,7 +223,6 @@ public class Things {
     }
     /* *************************************************************************************************** */
     public void Draw_Me(Graphics2D g2, int XOrg, int YOrg) {
-      //g2.setColor(Color.yellow);
       g2.setColor(Color.black);
       g2.drawRect(XOrg, YOrg, CellWdt, CellHgt);
       if (this.Ctr != null) {
@@ -235,8 +234,9 @@ public class Things {
   public static class GridWorld extends ArrayList<Soil> {
     public int Sz;
     public int Wdt, Hgt;
-    ArrayList<Soil> BirthList = new ArrayList<Soil>();
-    ArrayList<Soil> DeathList = new ArrayList<Soil>();
+    ArrayList<Soil> BirthList, DeathList;
+    int BirthNum, DeathNum;// for migration to arrays instead of collections
+    //Soil[] BirthList, DeathList; // in the future, want to migrate these to real arrays, for performance and C portability
     Soil[] ShuffleDex;
     /* *************************************************************************************************** */
     public void Init() {
@@ -248,9 +248,10 @@ public class Things {
       this.Wdt = WdtNew;
       this.Hgt = HgtNew;
       Sz = HgtNew * WdtNew;
-
+      //BirthList = new Soil[Sz]; DeathList = new Soil[Sz];
+      BirthList = new ArrayList<Soil>();
+      DeathList = new ArrayList<Soil>();
       ShuffleDex = new Soil[Sz];
-
       // fill cells
       for (int cnt = 0; cnt < Sz; cnt++) {
         Soil ph = new Soil();
@@ -293,7 +294,7 @@ public class Things {
 
     /* *************************************************************************************************** */
     public void Init_Seed() {
-      double Birth_Weight = LThresh * 1;// + BThresh;
+      double Birth_Weight = LThresh * 1.2;
       for (int cnt = 0; cnt < this.Sz; cnt++) {
         Soil box = this.Get(cnt);
         double chance = rand.nextDouble();
@@ -341,8 +342,10 @@ public class Things {
     /* *************************************************************************************************** */
     public void NacerMorir() {// To every thing, turn, turn
       GridWorld MyGrid = this;
-      BirthList = new ArrayList<Soil>();
-      DeathList = new ArrayList<Soil>();
+      BirthNum = 0;
+      DeathNum = 0;
+      BirthList.clear();
+      DeathList.clear();
       int Sz = MyGrid.GetSz();
       for (int cnt = 0; cnt < Sz; cnt++) {
         Soil ph = MyGrid.Get(cnt);
@@ -350,11 +353,13 @@ public class Things {
         {
           if (ph.Ctr.IsMoribund()) {//if E not enough to live
             DeathList.add(ph);// mark for death
+            DeathNum++;
           }
         } else {//if this grid cell empty
           ph.UpdateFertility();// take E of region in grid
           if (ph.IsFertile()) {// mark cell for possible birth
             BirthList.add(ph);
+            BirthNum++;
           }
         }
       }
@@ -369,7 +374,7 @@ public class Things {
         }
       });
 
-      for (Soil ph : BirthList) {//now go down list, for each
+      for (Soil ph : BirthList) {// go from most fertile to least fertile soil
         ph.UpdateFertility();// take E of region in grid
         if (ph.IsFertile())// if neighborhood still has resources to create child here
         {
