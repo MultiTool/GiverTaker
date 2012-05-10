@@ -16,15 +16,12 @@ import java.awt.event.*;
  * git clone https://MultiTool@github.com/MultiTool/GiverTaker.git
  */
 public class GiverTaker extends JFrame {
-
   private JPanel MainPanel = new JPanel(); // North quadrant
   public static final Things.GridWorld world = new Things.GridWorld();
-
   public GiverTaker() {
     this.setSize(500, 500);
     setTitle("");
   }
-
   /**
    * @param args the command line arguments
    */
@@ -38,7 +35,6 @@ public class GiverTaker extends JFrame {
     } else {
       JFrame frame = new JFrame("GiverTaker");
       frame.addKeyListener(new KeyListener() {
-
         @Override
         public void keyPressed(KeyEvent e) {
           if (e.getKeyChar() == e.VK_ESCAPE) {
@@ -46,21 +42,22 @@ public class GiverTaker extends JFrame {
           }
         }
         // unused abstract methods 
-
         @Override
         public void keyTyped(KeyEvent e) {
         }
-
         public void keyReleased(KeyEvent e) {
         }
       });
-      if (false) {
-        JLabel Census = new JLabel();
-        Census.setText("Givers: Takers:");
-        frame.getContentPane().add(Census);
-      }
-      JPanel MainPanel = new JPanel() {
 
+
+      //Box MainPanel = Box.createVerticalBox();//new JPanel(new BorderLayout());
+      //JPanel MainPanel = new JPanel(new SpringLayout());
+      JPanel MainPanel = new JPanel(new BorderLayout());
+      frame.getContentPane().add(MainPanel);
+      MainPanel.setSize(600, 600);
+      //MainPanel.setBackground(Color.red);
+
+      JPanel ArtPanel = new JPanel() {
         @Override
         public void paintComponent(Graphics g) {
           super.paintComponent(g);
@@ -74,12 +71,20 @@ public class GiverTaker extends JFrame {
           this.repaint();
         }
       };
-      //MainPanel.setSize(500, 500);
-      MainPanel.setBackground(Color.white);
-      frame.getContentPane().add(MainPanel);
-      frame.setSize(500, 500);
+      MainPanel.add(ArtPanel);
+      //frame.getContentPane().add(ArtPanel);
+      ArtPanel.setBackground(Color.white);
+      ArtPanel.setSize(500, 500);
+
+      if (false) {
+        JLabel Census = new JLabel();
+        Census.setText("Givers: Takers:");
+        //MainPanel.add(Census, SpringLayout.BASELINE);
+        MainPanel.add(Census);
+      }
+
+      frame.setSize(500, 550);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      //frame.pack();
       frame.setVisible(true);
     }
   }

@@ -27,9 +27,9 @@ public class Things {
   public static final Double Grace = 0.5;// to keep Takers from eating their children right away
   public static final Double LThresh = 1.0;
   public static final Double BThresh = LThresh * 2.0 + Grace * 2.0;
-  // giver and taker self-weight vs social-weight do not have to be the same, but it is convenient
-  public static final Double SelfWeight = 0.10;
-  public static final Double SocialWeight = 0.16;
+  // giver and taker self-impact vs social-impact do not have to be the same, but it is convenient
+  public static final Double SelfImpact = 0.10;
+  public static final Double SocialImpact = 0.15;
   public static Random rand = new Random();
   public Things() {
   }
@@ -57,8 +57,8 @@ public class Things {
     }
   }
   public static class Giver extends Org {
-    double YouGetQuant = SocialWeight * DramaFactor;
-    double IGiveQuant = SelfWeight * DramaFactor;
+    double YouGetQuant = SocialImpact * DramaFactor;
+    double IGiveQuant = SelfImpact * DramaFactor;
     @Override
     public double GetSpareE() {// food above survival level
       return this.E - LThresh;
@@ -88,8 +88,8 @@ public class Things {
     }
   };
   public static class Taker extends Org {
-    double IGetQuant = SelfWeight * DramaFactor;
-    double YouLoseQuant = SocialWeight * DramaFactor;
+    double IGetQuant = SelfImpact * DramaFactor;
+    double YouLoseQuant = SocialImpact * DramaFactor;
     @Override
     public double GetSpareE() {// food above survival level
       return this.E - LThresh;
