@@ -249,8 +249,9 @@ public class Things {
     Soil[] ShuffleDex;
     /* *************************************************************************************************** */
     public void Init() {
-      Init_Topology(20, 20);
-      Init_Seed();
+      this.Init_Topology(40, 40);
+      //this.Init_Seed();
+      this.Init_Seed_Island();
     }
     /* *************************************************************************************************** */
     public void Init_Topology(int WdtNew, int HgtNew) {
@@ -315,6 +316,33 @@ public class Things {
         }
       }
     }
+    /* *************************************************************************************************** */
+    public void Init_Seed_Island() {
+      double Birth_Weight = LThresh * 1.2;
+      if (true) {
+        for (int cnt = 0; cnt < this.Sz; cnt++) {
+          Soil box = this.Get(cnt);
+          double chance = rand.nextDouble();
+          if (chance < 0.33) {
+            box.Ctr = new Taker();
+            box.Ctr.E = Birth_Weight;
+          }
+        }
+      }
+      int BoxWdt = 10;
+      int BoxHgt = 10;
+      int Left = (this.Wdt - BoxWdt) / 2;
+      int Top = (this.Hgt - BoxHgt) / 2;
+      int Right = (Left + BoxWdt);
+      int Bottom = (Top + BoxHgt);
+      for (int Ycnt = Top; Ycnt < Bottom; Ycnt++) {
+        for (int Xcnt = Left; Xcnt < Right; Xcnt++) {
+          Soil box = this.Get(Xcnt, Ycnt);
+          box.Ctr = new Giver();
+          box.Ctr.E = Birth_Weight;
+        }
+      }
+    }
     public Soil Get(int Col, int Row) {
       int Dex = Row * Wdt + Col;
       return this.get(Dex);
@@ -333,11 +361,17 @@ public class Things {
           cell.Draw_Me(g2, XOrg + Col * CellWdt, YOrg + Row * CellHgt);
         }
       }
+      String GNum = Integer.toString(CensusRay[GiverType]);
+      String TNum = Integer.toString(CensusRay[TakerType]);
+      g2.setColor(Color.black);
+      //g2.drawString(" G:" + GNum + " T:" + TNum, XOrg, YOrg + Hgt * CellHgt + 10);
+      g2.drawString(" G:" + GNum + " T:" + TNum, XOrg, YOrg);
     }
     /* *************************************************************************************************** */
     public void Run_Cycle() {
       this.Interact();
       this.NacerMorir();
+      Census();
     }
     /* *************************************************************************************************** */
     public void Interact() {
@@ -394,9 +428,10 @@ public class Things {
         ph.Vacate();
       }
     }
+    int[] CensusRay = new int[]{0, 0};// NumTypes
     /* *************************************************************************************************** */
     public void Census() {
-      int[] CensusRay = new int[]{0, 0};// NumTypes
+      CensusRay = new int[]{0, 0};// NumTypes
       for (int cnt = 0; cnt < this.Sz; cnt++) {
         Soil sl = this.Get(cnt);
         if (sl.Ctr != null) {

@@ -26,8 +26,7 @@ public class GiverTaker extends JFrame {
    * @param args the command line arguments
    */
   public static void main(String[] args) {
-    world.Init_Topology(40, 40);
-    world.Init_Seed();
+    world.Init();
     if (false) {
       GiverTaker window = new GiverTaker();
       window.setVisible(true);
@@ -64,7 +63,7 @@ public class GiverTaker extends JFrame {
           Graphics2D g2 = (Graphics2D) g;
           world.Draw_Me(g2, 10, 30);
           try {
-            Thread.sleep(10);
+            //Thread.sleep(10);
           } catch (Exception ex) {
           }
           world.Run_Cycle();
