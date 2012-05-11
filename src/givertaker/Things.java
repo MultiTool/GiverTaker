@@ -19,7 +19,7 @@ public class Things {
   public static final int OrgBorder = 1;
   public static int OrgWdt = CellWdt - OrgBorder * 2, OrgHgt = CellHgt - OrgBorder * 2;
   public static double DramaFactor = 0.2;// scales size of transactions
-  public static double Entropy = 0.05 * DramaFactor;
+  public static double Entropy = 0.051 * DramaFactor;
   // None of these values have to be the same for both giver and taker, but for now they are for convenience.
   public static final Double Grace = 0.5;// to keep Takers from eating their children right away
   public static final Double LThresh = 1.0;
@@ -323,14 +323,15 @@ public class Things {
         for (int cnt = 0; cnt < this.Sz; cnt++) {
           Soil box = this.Get(cnt);
           double chance = rand.nextDouble();
+
           if (chance < 0.33) {
             box.Ctr = new Taker();
             box.Ctr.E = Birth_Weight;
           }
         }
       }
-      int BoxWdt = 10;
-      int BoxHgt = 10;
+      int BoxWdt = 5;
+      int BoxHgt = 5;
       int Left = (this.Wdt - BoxWdt) / 2;
       int Top = (this.Hgt - BoxHgt) / 2;
       int Right = (Left + BoxWdt);
