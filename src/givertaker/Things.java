@@ -19,13 +19,15 @@ public class Things {
   public static final int OrgBorder = 1;
   public static int OrgWdt = CellWdt - OrgBorder * 2, OrgHgt = CellHgt - OrgBorder * 2;
   public static double DramaFactor = 0.2;// scales size of transactions
-  public static double Entropy = 0.051 * DramaFactor;
+  //public static double Entropy = 0.051 * DramaFactor;
+  public static double Entropy = 0.049 * DramaFactor;
   // None of these values have to be the same for both giver and taker, but for now they are for convenience.
   public static final Double Grace = 0.5;// to keep Takers from eating their children right away
   public static final Double LThresh = 1.0;
   public static final Double BThresh = LThresh * 2.0 + Grace * 2.0;
   public static final Double SelfImpact = 0.10;
   public static final Double SocialImpact = 0.15;
+  //public static final Double SocialImpact = 0.20;
   public static Random rand = new Random();
   public Things() {
   }
@@ -250,8 +252,11 @@ public class Things {
     /* *************************************************************************************************** */
     public void Init() {
       this.Init_Topology(40, 40);
-      //this.Init_Seed();
-      this.Init_Seed_Island();
+      if (true) {
+        this.Init_Seed();
+      } else {
+        this.Init_Seed_Island();
+      }
     }
     /* *************************************************************************************************** */
     public void Init_Topology(int WdtNew, int HgtNew) {
@@ -319,7 +324,7 @@ public class Things {
     /* *************************************************************************************************** */
     public void Init_Seed_Island() {
       double Birth_Weight = LThresh * 1.2;
-      if (true) {
+      if (false) {
         for (int cnt = 0; cnt < this.Sz; cnt++) {
           Soil box = this.Get(cnt);
           double chance = rand.nextDouble();
@@ -330,16 +335,21 @@ public class Things {
           }
         }
       }
-      int BoxWdt = 5;
-      int BoxHgt = 5;
-      int Left = (this.Wdt - BoxWdt) / 2;
-      int Top = (this.Hgt - BoxHgt) / 2;
+      // Init_Box_Colony(new Taker(), 17, 17, 4, 4); Init_Box_Colony(new Giver(), 18, 18, 5, 5);
+      //Init_Box_Colony(new Taker(), 16, 16, 7, 7); Init_Box_Colony(new Giver(), 18, 18, 6, 6);
+      Init_Box_Colony(new Giver(), 18, 18, 1, 2);
+    }
+    /* *************************************************************************************************** */
+    public void Init_Box_Colony(Org First, int Xorg, int Yorg, int BoxWdt, int BoxHgt) {
+      double Birth_Weight = LThresh * 1.2;
+      int Left = Xorg;// (this.Wdt - BoxWdt) / 2;
+      int Top = Yorg;// (this.Hgt - BoxHgt) / 2;
       int Right = (Left + BoxWdt);
       int Bottom = (Top + BoxHgt);
       for (int Ycnt = Top; Ycnt < Bottom; Ycnt++) {
         for (int Xcnt = Left; Xcnt < Right; Xcnt++) {
           Soil box = this.Get(Xcnt, Ycnt);
-          box.Ctr = new Giver();
+          box.Ctr = First.GiveBirth();
           box.Ctr.E = Birth_Weight;
         }
       }
