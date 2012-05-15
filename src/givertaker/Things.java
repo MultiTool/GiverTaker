@@ -308,7 +308,7 @@ public class Things {
     }
     /* *************************************************************************************************** */
     public void Init_Seed() {
-      double Birth_Weight = LThresh * 1.2;
+      double Birth_Weight = LThresh * 1.5 + Grace * 1.5;
       for (int cnt = 0; cnt < this.Sz; cnt++) {
         Soil box = this.Get(cnt);
         double chance = rand.nextDouble();
