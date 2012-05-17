@@ -54,6 +54,7 @@ public class GiverTaker extends JFrame {
       JPanel MainPanel = new JPanel(new BorderLayout());
       frame.getContentPane().add(MainPanel);
       MainPanel.setSize(600, 600);
+      //MainPanel.setLayout(new GridBagLayout());
       //MainPanel.setBackground(Color.red);
 
       JPanel ArtPanel = new JPanel() {
@@ -70,16 +71,38 @@ public class GiverTaker extends JFrame {
           this.repaint();
         }
       };
+         /*   
+      Canvas ArtPanel = new Canvas() {
+        @Override
+        public void paint(Graphics g) {
+          super.paint(g);
+          Graphics2D g2 = (Graphics2D) g;
+          world.Draw_Me(g2, 10, 30);
+          try {
+            //Thread.sleep(10);
+          } catch (Exception ex) {
+          }
+          world.Run_Cycle();
+          this.repaint();
+        }
+      };
+      */
+              
       MainPanel.add(ArtPanel);
+      //MainPanel.add(ArtPanel, new GridBagConstraints());
+      ArtPanel.setPreferredSize(new Dimension(500, 500));
+      //ArtPanel.setSize(500, 500);
       //frame.getContentPane().add(ArtPanel);
       ArtPanel.setBackground(Color.white);
-      ArtPanel.setSize(500, 500);
-
+      
       if (false) {
         JLabel Census = new JLabel();
         Census.setText("Givers: Takers:");
+
+        MainPanel.add(Census, new GridBagConstraints());
+
         //MainPanel.add(Census, SpringLayout.BASELINE);
-        MainPanel.add(Census);
+        //MainPanel.add(Census);
       }
 
       frame.setSize(500, 550);
