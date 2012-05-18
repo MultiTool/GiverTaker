@@ -87,7 +87,7 @@ public class GiverTaker extends JFrame {
         }
       };
       */
-              
+         
       MainPanel.add(ArtPanel);
       //MainPanel.add(ArtPanel, new GridBagConstraints());
       ArtPanel.setPreferredSize(new Dimension(500, 500));

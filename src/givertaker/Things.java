@@ -15,28 +15,32 @@ import java.util.*;
  * git clone https://MultiTool@github.com/MultiTool/GiverTaker.git
  */
 public class Things {
-  public static final int CellWdt = 10, CellHgt = 10;
+
+  public static final int CellWdt = 6, CellHgt = 6;
   public static final int OrgBorder = 1;
   public static int OrgWdt = CellWdt - OrgBorder * 2, OrgHgt = CellHgt - OrgBorder * 2;
   public static double DramaFactor = 0.2;// scales size of transactions
   //public static double Entropy = 0.051 * DramaFactor;
-  public static double Entropy = 0.049 * DramaFactor;
+  public static final double Entropy = 0.049 * DramaFactor;
   // None of these values have to be the same for both giver and taker, but for now they are for convenience.
   public static final Double Grace = 0.5;// to keep Takers from eating their children right away
   public static final Double LThresh = 1.0;
   public static final Double BThresh = LThresh * 2.0 + Grace * 2.0;
   public static final Double SelfImpact = 0.10;
-  public static final Double SocialImpact = 0.15;
-  //public static final Double SocialImpact = 0.20;
+  //public static final Double SocialImpact = 0.15;
+  public static final Double SocialImpact = 0.20;
   public static Random rand = new Random();
+  public static int Generation = 0;
   public Things() {
   }
   public enum OrgType {
+
     Giver, Taker
   };
   public static final int GiverType = 0, TakerType = 1, NumTypes = 2;
   /* *************************************************************************************************** */
   public static class Org {
+
     public int MyType; // OrgType MyType;
     public double E;
     public Org() {
@@ -60,6 +64,7 @@ public class Things {
   }
   /* *************************************************************************************************** */
   public static class Giver extends Org {
+
     static final double YouGetQuant = SocialImpact * DramaFactor;
     static final double IGiveQuant = SelfImpact * DramaFactor;
     public Giver() {
@@ -95,6 +100,7 @@ public class Things {
   };
   /* *************************************************************************************************** */
   public static class Taker extends Org {
+
     static final double IGetQuant = SelfImpact * DramaFactor;
     static final double YouLoseQuant = SocialImpact * DramaFactor;
     public Taker() {
@@ -134,6 +140,7 @@ public class Things {
   };
   /* *************************************************************************************************** */
   public static class Soil {
+
     public Org Ctr;
     public int MyDex;
     public Soil FattestNbr;
@@ -243,6 +250,7 @@ public class Things {
   }
   /* *************************************************************************************************** */
   public static class GridWorld extends ArrayList<Soil> {
+
     public int Sz;
     public int Wdt, Hgt;
     ArrayList<Soil> BirthList, DeathList;
@@ -308,7 +316,7 @@ public class Things {
     }
     /* *************************************************************************************************** */
     public void Init_Seed() {
-      double Birth_Weight = LThresh * 1.5 + Grace * 1.5;
+      double Birth_Weight = LThresh * 1.5;// + Grace * 1.5;
       for (int cnt = 0; cnt < this.Sz; cnt++) {
         Soil box = this.Get(cnt);
         double chance = rand.nextDouble();
@@ -372,17 +380,23 @@ public class Things {
           cell.Draw_Me(g2, XOrg + Col * CellWdt, YOrg + Row * CellHgt);
         }
       }
+      String Gen = Integer.toString(Generation);
       String GNum = Integer.toString(CensusRay[GiverType]);
       String TNum = Integer.toString(CensusRay[TakerType]);
       g2.setColor(Color.black);
       //g2.drawString(" G:" + GNum + " T:" + TNum, XOrg, YOrg + Hgt * CellHgt + 10);
-      g2.drawString(" G:" + GNum + " T:" + TNum, XOrg, YOrg);
+      g2.drawString("Gen:" + Gen + " Givers:" + GNum + " Takers:" + TNum, XOrg, YOrg);
     }
     /* *************************************************************************************************** */
     public void Run_Cycle() {
       this.Interact();
       this.NacerMorir();
       Census();
+      if (CensusRay[GiverType] != 0) {
+        if (CensusRay[TakerType] != 0) {
+          Generation++;
+        }
+      }
     }
     /* *************************************************************************************************** */
     public void Interact() {
@@ -419,6 +433,7 @@ public class Things {
 
       Collections.shuffle(BirthList);// randomize to prevent spatial bias in birth order
       Collections.sort(BirthList, new Comparator() {// sort by sum E here.
+
         @Override
         public int compare(Object o1, Object o2) {
           Soil s1 = (Soil) o1;
