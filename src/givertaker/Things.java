@@ -15,7 +15,6 @@ import java.util.*;
  * git clone https://MultiTool@github.com/MultiTool/GiverTaker.git
  */
 public class Things {
-
   public static final int CellWdt = 6, CellHgt = 6;
   public static final int OrgBorder = 1;
   public static int OrgWdt = CellWdt - OrgBorder * 2, OrgHgt = CellHgt - OrgBorder * 2;
@@ -34,13 +33,11 @@ public class Things {
   public Things() {
   }
   public enum OrgType {
-
     Giver, Taker
   };
   public static final int GiverType = 0, TakerType = 1, NumTypes = 2;
   /* *************************************************************************************************** */
   public static class Org {
-
     public int MyType; // OrgType MyType;
     public double E;
     public Org() {
@@ -64,7 +61,6 @@ public class Things {
   }
   /* *************************************************************************************************** */
   public static class Giver extends Org {
-
     static final double YouGetQuant = SocialImpact * DramaFactor;
     static final double IGiveQuant = SelfImpact * DramaFactor;
     public Giver() {
@@ -100,7 +96,6 @@ public class Things {
   };
   /* *************************************************************************************************** */
   public static class Taker extends Org {
-
     static final double IGetQuant = SelfImpact * DramaFactor;
     static final double YouLoseQuant = SocialImpact * DramaFactor;
     public Taker() {
@@ -140,7 +135,6 @@ public class Things {
   };
   /* *************************************************************************************************** */
   public static class Soil {
-
     public Org Ctr;
     public int MyDex;
     public Soil FattestNbr;
@@ -250,13 +244,12 @@ public class Things {
   }
   /* *************************************************************************************************** */
   public static class GridWorld extends ArrayList<Soil> {
-
     public int Sz;
     public int Wdt, Hgt;
-    ArrayList<Soil> BirthList, DeathList;
-    int BirthNum, DeathNum;// for migration to arrays instead of collections
-    //Soil[] BirthList, DeathList; // in the future, want to migrate these to real arrays, for performance and C portability
+    int BirthNum, DeathNum;// migrating from collections to arrays 
+    Soil[] BirthList, DeathList; // in the future, want to migrate these to real arrays, for performance and C portability
     Soil[] ShuffleDex;
+    int[] CensusRay = new int[]{0, 0};// NumTypes
     /* *************************************************************************************************** */
     public void Init() {
       this.Init_Topology(40, 40);
@@ -271,9 +264,8 @@ public class Things {
       this.Wdt = WdtNew;
       this.Hgt = HgtNew;
       Sz = HgtNew * WdtNew;
-      //BirthList = new Soil[Sz]; DeathList = new Soil[Sz];
-      BirthList = new ArrayList<Soil>();
-      DeathList = new ArrayList<Soil>();
+      BirthList = new Soil[Sz];
+      DeathList = new Soil[Sz];
       ShuffleDex = new Soil[Sz];
       // fill cells
       for (int cnt = 0; cnt < Sz; cnt++) {
@@ -400,7 +392,7 @@ public class Things {
     }
     /* *************************************************************************************************** */
     public void Interact() {
-      Collections.shuffle(Arrays.asList(ShuffleDex));// shuffle to prevent spatial bias in order
+      ShuffleCells(ShuffleDex, this.Sz);// shuffle to prevent spatial bias in order
       for (int cnt = 0; cnt < this.Sz; cnt++) {
         Soil sl = this.ShuffleDex[cnt];
         sl.Interact();
@@ -411,38 +403,39 @@ public class Things {
       GridWorld MyGrid = this;
       BirthNum = 0;
       DeathNum = 0;
-      BirthList.clear();
-      DeathList.clear();
+      // BirthList.clear(); DeathList.clear();
       int Sz = MyGrid.GetSz();
       for (int cnt = 0; cnt < Sz; cnt++) {
         Soil ph = MyGrid.Get(cnt);
         if (ph.Ctr != null)// if my grid cell full:
         {
           if (ph.Ctr.IsMoribund()) {//if E not enough to live
-            DeathList.add(ph);// mark for death
+            DeathList[DeathNum] = ph;//DeathList.add(ph);// mark for death
             DeathNum++;
           }
         } else {//if this grid cell empty
           ph.UpdateFertility();// take E of region in grid
           if (ph.IsFertile()) {// mark cell for possible birth
-            BirthList.add(ph);
+            BirthList[BirthNum] = ph;//BirthList.add(ph);
             BirthNum++;
           }
         }
       }
-
-      Collections.shuffle(BirthList);// randomize to prevent spatial bias in birth order
-      Collections.sort(BirthList, new Comparator() {// sort by sum E here.
-
-        @Override
-        public int compare(Object o1, Object o2) {
-          Soil s1 = (Soil) o1;
-          Soil s2 = (Soil) o2;
-          return -Double.compare(s1.Fertility, s2.Fertility);// sort descending
-        }
-      });
-
-      for (Soil ph : BirthList) {// go from most fertile to least fertile soil
+      ShuffleCells(BirthList, BirthNum);// randomize to prevent spatial bias in birth order
+      SortCells(BirthList, BirthNum);// sort by sum E here.
+      /*
+       Collections.shuffle(Arrays.asList(BirthList));// randomize to prevent spatial bias in birth order
+       Collections.sort(Arrays.asList(BirthList), new Comparator() {// sort by sum E here.
+       @Override
+       public int compare(Object o1, Object o2) {
+       Soil s1 = (Soil) o1;
+       Soil s2 = (Soil) o2;
+       return Double.compare(s2.Fertility, s1.Fertility);// sort descending
+       }
+       });
+       */
+      for (int cnt = 0; cnt < BirthNum; cnt++) {
+        Soil ph = BirthList[cnt];// go from most fertile to least fertile soil
         ph.UpdateFertility();// take E of region in grid
         if (ph.IsFertile())// if neighborhood still has resources to create child here
         {
@@ -450,11 +443,11 @@ public class Things {
         }
       }
 
-      for (Soil ph : DeathList) {// Drag away the corpses.
+      for (int cnt = 0; cnt < DeathNum; cnt++) {// Drag away the corpses.
+        Soil ph = DeathList[cnt];// Drag away the corpses.
         ph.Vacate();
       }
     }
-    int[] CensusRay = new int[]{0, 0};// NumTypes
     /* *************************************************************************************************** */
     public void Census() {
       CensusRay = new int[]{0, 0};// NumTypes
@@ -464,6 +457,28 @@ public class Things {
           CensusRay[sl.Ctr.MyType]++;
         }
       }
+    }
+  }
+  /* *************************************************************************************************** */
+  public static void SortCells(Soil[] Cells, int Size) {
+    Arrays.sort(Cells, 0, Size, new Comparator() {// sort by sum E here.
+      @Override
+      public int compare(Object o1, Object o2) {
+        Soil s1 = (Soil) o1;
+        Soil s2 = (Soil) o2;
+        return Double.compare(s2.Fertility, s1.Fertility);// sort descending
+      }
+    });
+  }
+  /* *************************************************************************************************** */
+  public static void ShuffleCells(Soil[] Cells, int Size) {
+    Soil Temp;// randomize to prevent spatial bias in birth order      
+    int Odex;
+    for (int cnt = 0; cnt < Size; cnt++) {
+      Odex = rand.nextInt(Size);
+      Temp = Cells[cnt];
+      Cells[cnt] = Cells[Odex];
+      Cells[Odex] = Temp;
     }
   }
 }
